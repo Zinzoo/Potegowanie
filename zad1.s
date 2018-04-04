@@ -75,6 +75,7 @@ inc %rcx
 cmp $0, %rax
 jne petla2
 
+jmp skok
 movq %rcx, %rsi
 #sub $2, %rsi
 dec %rsi
@@ -87,15 +88,24 @@ dec %rsi
 cmp %rcx, %rdi
 jle odwracanie
 
-mov %rcx, %rsi
-sub $1, %rsi
+skok:
+movq $4, %rdi
+
+movq $256, %r12
+movq $0, %rsi
+#sub $1, %rsi
 movq $1, %r11
 algorytm:
-movb textfinal(, %rsi, 1), %al
+movb textout(, %rdi, 1), %bl
+movq %rbx, %rax
+movb textout(, %rsi, 1), %bl
+movq %rbx, %rax
 sub $LICZBY, %rax
 cmp $1, %rax
 jle cos_dziwnego
+
 sub $256, %rax
+
 cos_dziwnego:
 cmp $1, %rax
 jnz dalej
@@ -109,14 +119,14 @@ movq %r10, %rbx
 movq %r10, %rax
 mul %rbx
 movq %rax, %r10
-cmp $0, %rsi
-dec %rsi
+inc %rsi
+cmp %rsi, %rcx
 jge algorytm
 
 koniec:
 movq $SYSWRITE, %rax
 movq $STDOUT, %rdi
-movq $textfinal, %rsi
+movq $textout, %rsi
 movq $BUFLEN, %rdx
 syscall
 
