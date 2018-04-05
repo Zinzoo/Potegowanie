@@ -74,15 +74,19 @@ movb %dl, textout(, %rcx, 1)
 inc %rcx
 cmp $0, %rax
 jne petla2
+jmp poczatek
 
-movq $4, %rdi
+test:
+movq $SYSWRITE, %rax
+movq $STDOUT, %rdi
+movq $textout, %rsi
+movq $BUFLEN, %rdx
+syscall
 
+poczatek:
 movq $0, %rsi
-#sub $1, %rsi
 movq $1, %r11
 algorytm:
-movb textout(, %rdi, 1), %bl
-movq %rbx, %rax
 movb textout(, %rsi, 1), %bl
 movq %rbx, %rax
 sub $LICZBY, %rax
