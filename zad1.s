@@ -29,8 +29,8 @@ movq $BUFLEN, %rdx
 syscall
 movq $0, %rsi
 movb wykladnik(, %rsi, 1), %al
-movq %rax, %r10
-sub $LICZBY, %r10
+sub $LICZBY, %rax
+movq %rax, %r12
 
 
 movq $SYSREAD, %rax
@@ -75,23 +75,8 @@ inc %rcx
 cmp $0, %rax
 jne petla2
 
-jmp skok
-movq %rcx, %rsi
-#sub $2, %rsi
-dec %rsi
-movq $0, %rdi
-odwracanie:
-movb textout(, %rsi, 1), %al
-movb %al, textfinal( %rdi, 1)
-inc %rdi
-dec %rsi
-cmp %rcx, %rdi
-jle odwracanie
-
-skok:
 movq $4, %rdi
 
-movq $256, %r12
 movq $0, %rsi
 #sub $1, %rsi
 movq $1, %r11
@@ -110,18 +95,47 @@ cos_dziwnego:
 cmp $1, %rax
 jnz dalej
 movq %r11, %rax
-movq %r10, %rbx
+movq %r12, %rbx
 mul %rbx
 movq %rax, %r11
 
 dalej:
-movq %r10, %rbx
-movq %r10, %rax
+movq %r12, %rbx
+movq %r12, %rax
 mul %rbx
-movq %rax, %r10
+movq %rax, %r12
 inc %rsi
 cmp %rsi, %rcx
 jge algorytm
+
+przed:
+movq $0, %rdi
+movq %r11, %rax
+movq $10, %rbx
+movq $0, %rcx
+wyswietl:
+movq $0, %rdx
+div %rbx
+add $LICZBY, %rdx
+movb %dl, textfinal(, %rcx, 1)
+inc %rcx
+cmp $0, %rax
+jne wyswietl
+
+na_ekran0:
+movq $0, %rdi
+movq %rcx, %rsi
+dec %rsi
+
+na_ekran1:
+movb textfinal(, %rsi, 1), %al
+movb %al, textout(, %rdi, 1)
+inc %rdi
+dec %rsi
+cmp %rcx, %rdi
+jle na_ekran1
+
+
 
 koniec:
 movq $SYSWRITE, %rax
