@@ -12,8 +12,8 @@ NORMAAL = 10
 LICZBY = 48
 
 .bss
+.comm podstawa, 512
 .comm wykladnik, 512
-.comm textin, 512
 .comm textout, 512
 .comm textfinal, 512
 .text
@@ -21,33 +21,37 @@ LICZBY = 48
 
 main:
 
-wykladnik_wywolanie:
+#Pobranie podstawy
+movq $SYSREAD, %rax
+movq $STDIN, %rdi
+movq $podstawa, %rsi
+movq $BUFLEN, %rdx
+syscall
+
+
+movq $0, %rsi
+movb podstawa(, %rsi, 1), %al
+sub $LICZBY, %rax
+movq %rax, %r12
+
+#Pobranie wykladnika
 movq $SYSREAD, %rax
 movq $STDIN, %rdi
 movq $wykladnik, %rsi
 movq $BUFLEN, %rdx
 syscall
-movq $0, %rsi
-movb wykladnik(, %rsi, 1), %al
-sub $LICZBY, %rax
-movq %rax, %r12
 
-
-movq $SYSREAD, %rax
-movq $STDIN, %rdi
-movq $textin, %rsi
-movq $BUFLEN, %rdx
-syscall
-
+#Przed petla
 movq %rax, %rdi
 movq %rax, %r9
 sub $2, %rdi
 movq $1, %rsi
 movq $0, %r8
 
+#Umieszczenie wykladnika w r8
 petla:
 movq $0, %rax
-movb textin(, %rdi, 1), %al
+movb wykladnik(, %rdi, 1), %al
 sub $LICZBY, %al
 
 mul %rsi
@@ -62,10 +66,13 @@ dec %rdi
 cmp $0, %rdi
 jge petla
 
+
+#Przed petla2
 movq %r8, %rax
 movq $2, %rbx
 movq $0, %rcx
 
+#Zamiana wykladnika na liczbe w systemie dwojkowym
 petla2:
 movq $0, %rdx
 div %rbx
@@ -74,28 +81,21 @@ movb %dl, textout(, %rcx, 1)
 inc %rcx
 cmp $0, %rax
 jne petla2
-jmp poczatek
 
-test:
-movq $SYSWRITE, %rax
-movq $STDOUT, %rdi
-movq $textout, %rsi
-movq $BUFLEN, %rdx
-syscall
 
-poczatek:
+#Przygotowanie do algorytmu
 movq $0, %rsi
 movq $1, %r11
+
+#Glowny algorytm
 algorytm:
-movb textout(, %rsi, 1), %bl
+movb textout(, %rsi, 1), %bl	#Problem
 movq %rbx, %rax
 sub $LICZBY, %rax
 cmp $1, %rax
-jle cos_dziwnego
-
+jle jest_ok			#Proba naprawy problemu, nieskuteczna poniewaz kazda koleja pozycja staje sie wieksza po i-tej iteracji
 sub $256, %rax
-
-cos_dziwnego:
+jest_ok:
 cmp $1, %rax
 jnz dalej
 movq %r11, %rax
@@ -112,6 +112,7 @@ inc %rsi
 cmp %rsi, %rcx
 jge algorytm
 
+#Umieszczenie wyniku w textfinal
 przed:
 movq $0, %rdi
 movq %r11, %rax
@@ -126,11 +127,13 @@ inc %rcx
 cmp $0, %rax
 jne wyswietl
 
+
 na_ekran0:
 movq $0, %rdi
 movq %rcx, %rsi
 dec %rsi
 
+#Odwrocenie kolejnosci cyfr
 na_ekran1:
 movb textfinal(, %rsi, 1), %al
 movb %al, textout(, %rdi, 1)
