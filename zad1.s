@@ -89,7 +89,9 @@ movq $1, %r11
 
 #Glowny algorytm
 algorytm:
+movq $0, %rbx
 movb textout(, %rsi, 1), %bl	#Problem
+movq $0, %rax
 movq %rbx, %rax
 sub $LICZBY, %rax
 cmp $1, %rax
