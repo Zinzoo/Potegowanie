@@ -28,11 +28,29 @@ movq $podstawa, %rsi
 movq $BUFLEN, %rdx
 syscall
 
+#Przed petla0
+movq %rax, %rdi
+sub $2, %rdi
+movq $1, %rsi
+movq $0, %r12
 
-movq $0, %rsi
-movb podstawa(, %rsi, 1), %al
-sub $LICZBY, %rax
-movq %rax, %r12
+#Umieszczenie podstawy w r12
+petla0:
+movq $0, %rax
+movb podstawa(, %rdi, 1), %al
+sub $LICZBY, %al
+
+mul %rsi
+add %rax, %r12
+
+movq %rsi, %rax
+movq $NORMAAL, %rbx
+mul %rbx
+mov %rax, %rsi
+
+dec %rdi
+cmp $0, %rdi
+jge petla0
 
 #Pobranie wykladnika
 movq $SYSREAD, %rax
@@ -94,10 +112,6 @@ movb textout(, %rsi, 1), %bl	#Problem
 movq $0, %rax
 movq %rbx, %rax
 sub $LICZBY, %rax
-cmp $1, %rax
-jle jest_ok			#Proba naprawy problemu, nieskuteczna poniewaz kazda koleja pozycja staje sie wieksza po i-tej iteracji
-sub $256, %rax
-jest_ok:
 cmp $1, %rax
 jnz dalej
 movq %r11, %rax
